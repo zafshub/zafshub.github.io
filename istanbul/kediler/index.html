@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Merdiven Kedileri · Code Draws Istanbul</title>
+  <meta name="description" content="Evening on the rainbow stairs: a kitten, a butterfly, the lamps coming on and the moon over the Bosphorus. Every frame is drawn in JavaScript and the music is synthesized in the browser.">
+  <meta name="theme-color" content="#07080c">
+  <meta property="og:type" content="video.other">
+  <meta property="og:title" content="Merdiven Kedileri · Code Draws Istanbul No. 3">
+  <meta property="og:description" content="Istanbul, drawn in code. No images, no video model.">
+  <meta property="og:image" content="https://zafshub.github.io/posters/kediler.jpg">
+  <meta property="og:url" content="https://zafshub.github.io/istanbul/kediler/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Merdiven Kedileri · Code Draws Istanbul No. 3">
+  <meta name="twitter:description" content="Istanbul, drawn in code. No images, no video model.">
+  <meta name="twitter:image" content="https://zafshub.github.io/posters/kediler.jpg">
+  <link rel="preload" href="../../assets/fonts/cormorant-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body class="film-page">
+  <nav class="topnav">
+    <a class="brand" href="../../">drawn in code<span>.</span></a>
+    <a class="back" href="../">All Istanbul episodes</a>
+  </nav>
+  <main>
+    <div class="player" data-film></div>
+    <section class="film-info">
+      <p class="kicker">Code Draws Istanbul · No. 3 · 0:24</p>
+      <h1>Merdiven Kedileri</h1>
+      <p class="subtitle">The Stair Cats</p>
+      <p class="logline">Evening on the rainbow stairs: a kitten, a butterfly, the lamps coming on and the moon over the Bosphorus.</p>
+      <div class="actions">
+        <a class="btn primary" href="../../videos/kediler.mp4" download>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download MP4
+        </a>
+        <a class="btn" href="../">All episodes</a>
+      </div>
+      <p class="how"><strong>How it's made.</strong> Nothing here is a photo, a drawing file or a video model. A JavaScript function paints each frame from nothing: the rainbow stairs, the old apartment block, the lamps and string lights, four cats and a butterfly. The lullaby is in makam Kürdi, with a ney at moonrise.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountFilm } from '../../engine/film.js';
+    import * as film from './scene.js';
+    mountFilm(film);
+  </script>
+</body>
+</html>

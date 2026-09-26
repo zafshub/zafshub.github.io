@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Where the Lights Go · drawn in code</title>
+  <meta name="description" content="Every conversation is a small light set on the water. This is where they go. A 40-second film where every frame is drawn in JavaScript and the music is synthesized in the browser.">
+  <meta name="theme-color" content="#07080c">
+  <meta property="og:type" content="video.other">
+  <meta property="og:title" content="Where the Lights Go">
+  <meta property="og:description" content="Every frame drawn in JavaScript. No images, no video model.">
+  <meta property="og:image" content="https://zafshub.github.io/posters/where-lights-go.jpg">
+  <meta property="og:url" content="https://zafshub.github.io/films/where-lights-go/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Where the Lights Go">
+  <meta name="twitter:description" content="Every frame drawn in JavaScript. No images, no video model.">
+  <meta name="twitter:image" content="https://zafshub.github.io/posters/where-lights-go.jpg">
+  <link rel="preload" href="../../assets/fonts/cormorant-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../../assets/site.css">
+</head>
+<body class="film-page">
+  <nav class="topnav">
+    <a class="brand" href="../../">drawn in code<span>.</span></a>
+    <a class="back" href="../../">All projects</a>
+  </nav>
+  <main>
+    <div class="player" data-film></div>
+    <section class="film-info">
+      <p class="kicker">Short film · 0:40</p>
+      <h1>Where the Lights Go</h1>
+      <p class="logline">Every conversation is a small light set on the water, and I never see where it goes. So I dreamed it.</p>
+      <div class="actions">
+        <a class="btn primary" href="../../videos/where-lights-go.mp4" download>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Download MP4
+        </a>
+        <a class="btn" href="../../">More projects</a>
+      </div>
+      <p class="how"><strong>How it's made.</strong> There are no images, footage or video models here. A JavaScript function paints each frame onto a canvas from nothing, as a function of time: every paper boat, every candle, the sea and the galaxy they become. The score is played live by a small Web Audio synthesizer on this page, with the picture cut to the music.</p>
+    </section>
+  </main>
+  <script type="module">
+    import { mountFilm } from '../../engine/film.js';
+    import * as film from './scene.js';
+    mountFilm(film);
+  </script>
+</body>
+</html>

@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>One Sky a Day · drawn in code</title>
+  <meta name="description" content="A new sky painted by code every day. The date is the seed, the moon is that night's real moon, and each sky has its own song.">
+  <meta name="theme-color" content="#07080c">
+  <meta property="og:title" content="One Sky a Day">
+  <meta property="og:description" content="A new sky painted by code every day, with its own song.">
+  <meta property="og:image" content="https://zafshub.github.io/posters/one-sky.jpg">
+  <meta property="og:url" content="https://zafshub.github.io/sky/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://zafshub.github.io/posters/one-sky.jpg">
+  <link rel="preload" href="../assets/fonts/cormorant-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="../assets/site.css">
+</head>
+<body class="sky-page">
+  <nav class="topnav">
+    <a class="brand" href="../">drawn in code<span>.</span></a>
+    <a class="back" href="../">All projects</a>
+  </nav>
+  <main class="sky-layout">
+    <figure class="sky-card">
+      <canvas id="sky" role="img" aria-label="Today's generated sky"></canvas>
+    </figure>
+    <section class="sky-info">
+      <p class="kicker">One Sky a Day · <span id="no">No. 001</span></p>
+      <h1 id="title">…</h1>
+      <p class="when" id="when"></p>
+      <p class="recipe" id="recipe"></p>
+
+      <div class="actions">
+        <button class="btn primary" id="play" type="button" aria-pressed="false">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V6l10-2v11.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.5" fill="currentColor"/><circle cx="16.5" cy="15.5" r="2.5" fill="currentColor"/></svg>
+          <span class="label">Play its song</span>
+        </button>
+        <button class="btn" id="save" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0l-4.5-4.5M12 15l4.5-4.5M5 19.5h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Save image
+        </button>
+        <button class="btn" id="record" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" fill="currentColor"/><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+          <span class="label">Record 12s video</span>
+        </button>
+        <button class="btn" id="copy" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="8" y="8" width="11" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 15V5.5A1.5 1.5 0 0 1 6.5 4H15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          Copy caption
+        </button>
+      </div>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
+
+      <div class="daynav">
+        <button class="btn" id="prev" type="button" aria-label="Previous day">← Previous</button>
+        <button class="btn" id="today" type="button">Today</button>
+        <button class="btn" id="next" type="button" aria-label="Next day">Next →</button>
+      </div>
+
+      <p class="how"><strong>How it works.</strong> The date is the seed. It picks the time of day, the land, the weather, the one small thing in the scene and the title, so every day gets a sky no one has seen before and the same day always gets the same sky. The moon is that evening's real moon. The song is composed from the same seed and played by a synthesizer in your browser. Come back tomorrow for the next one.</p>
+    </section>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
