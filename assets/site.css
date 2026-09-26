@@ -171,6 +171,7 @@ a { color: inherit; }
 .film-info { width: min(720px, 100% - 32px); margin: 28px auto 0; }
 .film-info .kicker { margin: 0 0 6px; font: 600 11px/1.4 var(--sans); letter-spacing: 0.16em; text-transform: uppercase; color: var(--accent); }
 .film-info h1 { margin: 0; font: italic 500 clamp(40px, 7vw, 64px)/1.02 var(--serif); letter-spacing: -0.01em; }
+.film-info .subtitle { margin: 6px 0 0; font: italic 400 clamp(22px, 3vw, 28px)/1.2 var(--serif); color: var(--muted); }
 .film-info .logline { margin: 12px 0 0; font: 400 clamp(19px, 2.6vw, 23px)/1.45 var(--serif); color: #d8d1c4; }
 .film-info .actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 22px 0 0; }
 .film-info .how { margin: 28px 0 0; padding-top: 20px; border-top: 1px solid var(--line); color: var(--muted); font-size: 15px; }
@@ -229,6 +230,17 @@ a { color: inherit; }
 .work.feature h2 { font-size: clamp(36px, 4.4vw, 52px); }
 .work.feature .work-text p:not(.kicker) { font-size: 17px; max-width: 48ch; }
 
+.episodes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 24px; padding-bottom: 24px; }
+.episodes .work h2 { font-size: clamp(28px, 2.8vw, 34px); }
+.work h2 .en { display: block; margin-top: 4px; font: italic 400 20px/1.2 var(--serif); color: var(--muted); }
+.works .span { grid-column: 1 / -1; }
+.series-head { grid-column: 1 / -1; display: flex; align-items: baseline; justify-content: space-between; gap: 16px; padding-top: 24px; border-top: 1px solid var(--line); }
+.series-head h2 { margin: 0; font: italic 500 clamp(32px, 4vw, 46px)/1.05 var(--serif); }
+.series-head h2 span { color: var(--accent); }
+.series-head a { color: var(--muted); font-size: 14px; white-space: nowrap; }
+.series-head a:hover { color: var(--text); }
+.next { margin: 0; max-width: 70ch; color: var(--muted); font: italic 400 21px/1.5 var(--serif); }
+
 .about { padding: 56px 0 24px; margin-top: 40px; border-top: 1px solid var(--line); }
 .about h2 { margin: 0 0 20px; font: italic 500 36px/1.1 var(--serif); }
 .about-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; }
@@ -240,6 +252,7 @@ a { color: inherit; }
 @media (max-width: 760px) {
   .hero { padding: 28px 0 28px; }
   .works { grid-template-columns: 1fr; gap: 36px; }
+  .episodes { grid-template-columns: 1fr; gap: 32px; }
   .work.feature { grid-template-columns: 1fr; gap: 16px; }
   .work.feature .work-media { max-width: 420px; }
   .about-grid { grid-template-columns: 1fr; }

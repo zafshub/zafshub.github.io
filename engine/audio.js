@@ -113,6 +113,13 @@ function out(s, node, o) {
   }
 }
 
+/** A gain that starts silent: nothing can leak out before its envelope begins. */
+function silent(s) {
+  const g = s.ac.createGain();
+  g.gain.value = 0;
+  return g;
+}
+
 /** Percussive envelope: quick rise, exponential fall lasting ≈ `len` seconds. */
 function strike(param, t, peak, len, attack = 0.004) {
   param.setValueAtTime(0, t);
@@ -134,7 +141,7 @@ export const INSTRUMENTS = {
     const f = hz(note), vel = o.vel ?? 0.12, dur = o.dur ?? 2.6;
     const bus = s.ac.createGain();
     for (const [ratio, amp, len] of [[1, 1, 1], [2, 0.3, 0.42], [3.01, 0.11, 0.24], [4.17, 0.05, 0.13]]) {
-      const g = s.ac.createGain();
+      const g = silent(s);
       strike(g.gain, t, vel * amp, dur * len, 0.003);
       osc(s, 'sine', f * ratio, t, t + dur * len + 0.05).connect(g);
       g.connect(bus);
@@ -142,24 +149,134 @@ export const INSTRUMENTS = {
     out(s, bus, { send: 0.42, ...o });
   },
 
-  /** Soft harp-like pluck. */
+  /**
+   * Plucked string. Soft harp by default; `wave: 'sawtooth'` with a `bend`
+   * (cents, sliding down onto the note) gives a kanun/oud-like attack.
+   */
   pluck(s, t, note, o = {}) {
     const f = hz(note), vel = o.vel ?? 0.1, dur = o.dur ?? 1.8;
     const lp = s.ac.createBiquadFilter();
     lp.type = 'lowpass';
     lp.Q.value = 0.7;
     lp.frequency.setValueAtTime(Math.min(f * (o.bright ?? 7), 9000), t);
-    lp.frequency.setTargetAtTime(f * 1.6, t, 0.2);
-    const g = s.ac.createGain();
+    lp.frequency.setTargetAtTime(f * 1.6, t, o.wave ? 0.12 : 0.2);
+    const g = silent(s);
     strike(g.gain, t, vel, dur, 0.005);
     const end = t + dur + 0.05;
-    osc(s, 'triangle', f, t, end).connect(lp);
+    const main = osc(s, o.wave ?? 'triangle', f, t, end);
     const h = s.ac.createGain();
     h.gain.value = 0.22;
-    osc(s, 'sine', f * 2, t, end).connect(h);
+    const over = osc(s, 'sine', f * 2, t, end);
+    if (o.bend) {
+      for (const [x, k] of [[main, 1], [over, 2]]) {
+        x.frequency.setValueAtTime(f * k * 2 ** (o.bend / 1200), t);
+        x.frequency.exponentialRampToValueAtTime(f * k, t + 0.045);
+      }
+    }
+    main.connect(lp);
+    over.connect(h);
     h.connect(lp);
     lp.connect(g);
     out(s, g, { send: 0.3, ...o });
+  },
+
+  /** Ney: a breathy reed flute that slides into the note and blooms into vibrato. */
+  ney(s, t, note, o = {}) {
+    const f = hz(note), vel = o.vel ?? 0.08, dur = o.dur ?? 1;
+    const attack = o.attack ?? 0.12, release = o.release ?? 0.3;
+    const end = t + dur + release * 2 + 0.1;
+    const x = osc(s, wave(s, 'ney', [0, 1, 0.16, 0.07, 0.025]), f, t, end);
+    x.frequency.setValueAtTime(f * 2 ** (-(o.slide ?? 40) / 1200), t);
+    x.frequency.exponentialRampToValueAtTime(f, t + 0.1);
+    const lfo = osc(s, 'sine', o.vib ?? 5.3, t, end);
+    const depth = silent(s);
+    depth.gain.setValueAtTime(0, t);
+    depth.gain.linearRampToValueAtTime(f * 0.0065, t + Math.min(0.6, dur * 0.7));
+    lfo.connect(depth);
+    depth.connect(x.frequency);
+    const g = silent(s);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vel, t + attack);
+    g.gain.setValueAtTime(vel, t + Math.max(attack, dur));
+    g.gain.setTargetAtTime(0, t + Math.max(attack, dur), release / 3);
+    x.connect(g);
+    // breath: noise around the note, strongest at the start
+    const n = s.ac.createBufferSource();
+    n.buffer = s.noise;
+    n.loop = true;
+    const bp = s.ac.createBiquadFilter();
+    bp.type = 'bandpass';
+    bp.frequency.value = f * 2.2;
+    bp.Q.value = 1.4;
+    const ng = silent(s);
+    ng.gain.setValueAtTime(0, t);
+    ng.gain.linearRampToValueAtTime(vel * 0.9, t + attack * 0.6);
+    ng.gain.setTargetAtTime(vel * 0.3, t + attack, 0.15);
+    ng.gain.setTargetAtTime(0, t + Math.max(attack, dur), release / 3);
+    n.connect(bp);
+    bp.connect(ng);
+    ng.connect(g);
+    n.start(t, (t * 3.7) % 1.9);
+    n.stop(end);
+    s.sources.push(n);
+    out(s, g, { send: 0.5, ...o });
+  },
+
+  /** A ship's horn: two slightly beating low saws and a sub, through a closed filter. */
+  horn(s, t, o = {}) {
+    const f = o.f ?? 98, dur = o.dur ?? 1.2, vel = o.vel ?? 0.22;
+    const end = t + dur + 1;
+    const lp = s.ac.createBiquadFilter();
+    lp.type = 'lowpass';
+    lp.frequency.value = o.cutoff ?? 650;
+    lp.Q.value = 1.1;
+    const g = silent(s);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vel, t + 0.14);
+    g.gain.setValueAtTime(vel, t + dur);
+    g.gain.setTargetAtTime(0, t + dur, 0.14);
+    for (const [ratio, type, k] of [[1, 'sawtooth', 1], [1.004, 'sawtooth', 0.8], [0.5, 'square', 0.35], [1.26, 'sawtooth', 0.35]]) {
+      const x = osc(s, type, f * ratio, t, end);
+      x.frequency.setValueAtTime(f * ratio * 0.97, t);
+      x.frequency.exponentialRampToValueAtTime(f * ratio, t + 0.22);
+      const kg = s.ac.createGain();
+      kg.gain.value = k;
+      x.connect(kg);
+      kg.connect(lp);
+    }
+    lp.connect(g);
+    out(s, g, { send: 0.55, ...o });
+  },
+
+  /** A seagull's cry: a quick rise and a long raspy fall. */
+  gull(s, t, o = {}) {
+    const f = o.f ?? 1500, dur = o.dur ?? 0.42, vel = o.vel ?? 0.04;
+    const end = t + dur + 0.05;
+    const x = osc(s, 'sawtooth', f, t, end);
+    x.frequency.setValueAtTime(f * 0.72, t);
+    x.frequency.linearRampToValueAtTime(f * 1.08, t + dur * 0.2);
+    x.frequency.exponentialRampToValueAtTime(f * 0.58, t + dur);
+    const rasp = osc(s, 'sine', 31, t, end);
+    const rg = s.ac.createGain();
+    rg.gain.value = f * 0.03;
+    rasp.connect(rg);
+    rg.connect(x.frequency);
+    const g = silent(s);
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(vel, t + 0.025);
+    g.gain.setValueAtTime(vel * 0.8, t + dur * 0.6);
+    g.gain.linearRampToValueAtTime(0, t + dur);
+    const mix = s.ac.createGain();
+    for (const [fc, q] of [[2300, 2], [3600, 3]]) {
+      const bp = s.ac.createBiquadFilter();
+      bp.type = 'bandpass';
+      bp.frequency.value = fc * (f / 1500);
+      bp.Q.value = q;
+      x.connect(bp);
+      bp.connect(mix);
+    }
+    mix.connect(g);
+    out(s, g, { send: 0.4, ...o });
   },
 
   /** Warm electric-piano-ish keys. */
@@ -171,7 +288,7 @@ export const INSTRUMENTS = {
     lp.Q.value = 0.5;
     lp.frequency.setValueAtTime(Math.min(f * 9, 10000), t);
     lp.frequency.setTargetAtTime(f * 2.2, t, 0.35);
-    const g = s.ac.createGain();
+    const g = silent(s);
     strike(g.gain, t, vel, dur, 0.006);
     const end = t + dur + 0.05;
     osc(s, w, f, t, end).connect(lp);
@@ -197,7 +314,7 @@ export const INSTRUMENTS = {
     lp.type = 'lowpass';
     lp.Q.value = 0.4;
     lp.frequency.value = o.cutoff ?? 1000;
-    const g = s.ac.createGain();
+    const g = silent(s);
     const top = t + Math.max(attack, hold);
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(level, t + attack);
@@ -217,7 +334,7 @@ export const INSTRUMENTS = {
 
   bass(s, t, note, o = {}) {
     const f = hz(note), vel = o.vel ?? 0.2, dur = o.dur ?? 2;
-    const g = s.ac.createGain();
+    const g = silent(s);
     strike(g.gain, t, vel, dur, 0.012);
     const end = t + dur + 0.05;
     osc(s, 'sine', f, t, end).connect(g);
@@ -241,7 +358,7 @@ export const INSTRUMENTS = {
     f.Q.value = o.q ?? 0.7;
     f.frequency.setValueAtTime(o.f0 ?? 800, t);
     if (o.f1 && o.f1 !== o.f0) f.frequency.exponentialRampToValueAtTime(o.f1, t + dur);
-    const g = s.ac.createGain();
+    const g = silent(s);
     const vel = o.vel ?? 0.05;
     if (o.shape === 'swell') {
       g.gain.setValueAtTime(0.0001, t);
@@ -283,7 +400,7 @@ export const INSTRUMENTS = {
     const x = osc(s, 'sine', f0, t, t + dur + 0.03);
     x.frequency.setValueAtTime(f0, t);
     x.frequency.exponentialRampToValueAtTime(f1, t + dur);
-    const g = s.ac.createGain();
+    const g = silent(s);
     g.gain.setValueAtTime(0, t);
     g.gain.linearRampToValueAtTime(vel, t + Math.min(0.012, dur / 3));
     g.gain.linearRampToValueAtTime(0, t + dur);
@@ -297,7 +414,7 @@ export const INSTRUMENTS = {
     const x = osc(s, 'sine', f0, t, t + dur + 0.05);
     x.frequency.setValueAtTime(f0, t);
     x.frequency.exponentialRampToValueAtTime(f1, t + dur * 0.7);
-    const g = s.ac.createGain();
+    const g = silent(s);
     strike(g.gain, t, vel, dur, 0.004);
     x.connect(g);
     out(s, g, { send: 0.2, ...o });
@@ -324,6 +441,8 @@ export function collect(scoreFn) {
 
 /** Plays one event at audio time `when`; `skip` joins a sustained sound part-way through. */
 export function trigger(s, e, when, skip = 0) {
+  // snap to the sample grid: events a hair past a sample boundary can make a one-sample click
+  when = Math.round(when * s.ac.sampleRate) / s.ac.sampleRate;
   let args = e.args;
   if (skip > 0) {
     const last = args[args.length - 1];
