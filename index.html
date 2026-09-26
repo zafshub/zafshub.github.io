@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Drawn in code · zafshub</title>
+  <meta name="description" content="Short films, skies and small experiments. Every frame is painted by JavaScript and every note is synthesized in the browser. No images, no video models.">
+  <meta name="theme-color" content="#07080c">
+  <meta property="og:title" content="Drawn in code">
+  <meta property="og:description" content="Short films and a daily sky, every frame painted by JavaScript.">
+  <meta property="og:image" content="https://zafshub.github.io/posters/fallen-star.jpg">
+  <meta property="og:url" content="https://zafshub.github.io/">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://zafshub.github.io/posters/fallen-star.jpg">
+  <link rel="preload" href="assets/fonts/cormorant-italic-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="assets/site.css">
+</head>
+<body class="home">
+  <nav class="topnav">
+    <a class="brand" href="./">drawn in code<span>.</span></a>
+    <a class="back" href="#how">How it's made</a>
+  </nav>
+
+  <header class="hero wrap">
+    <p class="kicker">zafshub</p>
+    <h1>Every frame, drawn&nbsp;in&nbsp;code<span>.</span></h1>
+    <p class="lede">Short films, skies and small experiments. Each picture is painted by JavaScript on a canvas and each note is synthesized in the browser. No images, no footage, no video models.</p>
+  </header>
+
+  <main class="wrap works">
+    <article class="work">
+      <a class="work-media" href="films/fallen-star/" aria-label="Watch The Fallen Star">
+        <img src="posters/fallen-star.jpg" alt="A lone star over a night sea, laying a path of light towards a small rowing boat" width="1920" height="1080" loading="lazy">
+        <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></span>
+      </a>
+      <div class="work-text">
+        <p class="kicker">Short film · 0:39</p>
+        <h2><a href="films/fallen-star/">The Fallen Star</a></h2>
+        <p>A star falls into the sea. An old fisherman gives it his light.</p>
+        <p class="links"><a href="films/fallen-star/">Watch</a> · <a href="videos/fallen-star.mp4" download>Download MP4</a></p>
+      </div>
+    </article>
+
+    <article class="work">
+      <a class="work-media" href="films/last-leaf/" aria-label="Watch The Last Leaf">
+        <img src="posters/last-leaf.jpg" alt="A golden leaf flying over a valley with a village and a river at sunset" width="1920" height="1080" loading="lazy">
+        <span class="play" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M8 5.5v13l10.5-6.5z" fill="currentColor"/></svg></span>
+      </a>
+      <div class="work-text">
+        <p class="kicker">Short film · 0:39</p>
+        <h2><a href="films/last-leaf/">The Last Leaf</a></h2>
+        <p>Every leaf let go in autumn. One held on all winter.</p>
+        <p class="links"><a href="films/last-leaf/">Watch</a> · <a href="videos/last-leaf.mp4" download>Download MP4</a></p>
+      </div>
+    </article>
+
+    <article class="work feature">
+      <a class="work-media sky-media" href="sky/" aria-label="Open today's sky">
+        <canvas id="today-sky" width="540" height="675" role="img" aria-label="Today's generated sky"></canvas>
+      </a>
+      <div class="work-text">
+        <p class="kicker">Daily series · <span id="sky-no">new every day</span></p>
+        <h2><a href="sky/">One Sky a Day</a></h2>
+        <p>Every date paints a sky nobody has seen before, with its own song. The moon is that night's real moon. Today's is <em id="sky-title">loading</em>.</p>
+        <p class="links"><a href="sky/">See today's sky</a> · <a href="sky/">Play its song</a></p>
+      </div>
+    </article>
+  </main>
+
+  <section class="wrap about" id="how">
+    <h2>How it's made</h2>
+    <div class="about-grid">
+      <p><strong>Pictures are functions.</strong> Each film is one JavaScript function, <code>draw(t)</code>, that paints a frame from nothing at time <code>t</code>. The stars, water, leaves, snow and people are all shapes, gradients and a little math. Nothing is stored between frames, so you can scrub anywhere.</p>
+      <p><strong>Music is code too.</strong> A small Web Audio synthesizer plays the score live in your browser: bells, harp, keys, strings, wind and sea, with no samples. The picture is cut to the music, so a falling star lands on the downbeat.</p>
+      <p><strong>Same code, real video.</strong> The MP4s are the same pages, rendered frame by frame in a headless browser and muxed with the same score, bounced offline. What you download is exactly what the page plays.</p>
+    </div>
+  </section>
+
+  <footer class="wrap footer">
+    <p>Made with JavaScript, a canvas and Claude.</p>
+  </footer>
+
+  <script type="module">
+    import { prepare, today } from './sky/sky.js';
+    const canvas = document.getElementById('today-sky');
+    const ctx = canvas.getContext('2d');
+    const sky = prepare(today());
+    const R = sky.recipe;
+    document.getElementById('sky-title').textContent = `“${R.title}”`;
+    if (R.no >= 1) document.getElementById('sky-no').textContent = `No. ${String(R.no).padStart(3, '0')}`;
+    const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let visible = true, raf = 0;
+    const t0 = performance.now();
+    const paint = () => {
+      ctx.setTransform(0.5, 0, 0, 0.5, 0, 0);
+      sky.draw(ctx, still ? 0 : (performance.now() - t0) / 1000);
+      if (visible && !still) raf = requestAnimationFrame(paint);
+    };
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      cancelAnimationFrame(raf);
+      if (visible) paint();
+    }).observe(canvas);
+    paint();
+  </script>
+</body>
+</html>
