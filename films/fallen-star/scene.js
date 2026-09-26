@@ -4,7 +4,7 @@
 import {
   TAU, clamp, lerp, seg, smooth, easeIn, easeInOut, fade, hash, noise, curve, bezier, mixRgb, css,
 } from '../../engine/util.js';
-import { glow, disc, limb, joint, reach, grain, vignette, caption } from '../../engine/draw.js';
+import { glow, disc, limb, joint, reach, grain, vignette } from '../../engine/draw.js';
 
 export const meta = {
   title: 'The Fallen Star',
@@ -25,7 +25,7 @@ const ROW = 4 / 3; // one oar stroke = two beats
 
 const T = {
   tremble: 6, fall: 8, splash: 10, lift: 11, scoop: 12.3, blow: 14.3, climb: 14.9, inLamp: 15.6,
-  row: 16.4, arrive: 24, rise: 24.4, burst: 28, home: 29, out: 36.4, end: 39,
+  row: 16.4, arrive: 24, rise: 24.4, burst: 28, home: 29, out: 37.2, end: 39,
 };
 
 // ——— constant scenery (seeded, computed once) ———
@@ -861,26 +861,12 @@ export function draw(ctx, t) {
   // ——— screen space ———
   vignette(ctx, W, H, 0.45);
 
-  const title = fade(t, 0.9, 5.6, 1.2, 0.9);
-  caption(ctx, 'The Fallen Star', W / 2, 420, { size: 104, alpha: title, spacing: 1 });
-  caption(ctx, 'A SHORT FILM, DRAWN ENTIRELY IN CODE', W / 2, 506, {
-    size: 23, alpha: title * 0.8, italic: false, weight: 600, spacing: 7, shadow: 0.4,
-  });
-
-  caption(ctx, 'He gave the star his light.', W / 2, 948, { size: 58, alpha: fade(t, 29.6, 32.9, 0.8, 0.6) });
-  caption(ctx, 'Now it lights his way home.', W / 2, 948, { size: 58, alpha: fade(t, 33.1, 36.3, 0.8, 0.7) });
-
-  const black = smooth(seg(t, T.out, T.out + 1));
+  // fade in from black, and back out to black at the end: the pictures tell it all
+  const black = Math.max(1 - smooth(seg(t, 0, 1.4)), smooth(seg(t, T.out, T.end - 0.2)));
   if (black > 0) {
     ctx.fillStyle = `rgba(0,0,0,${black})`;
     ctx.fillRect(0, 0, W, H);
   }
-  const card = fade(t, 37.1, 40, 0.7, 0.1);
-  caption(ctx, 'The Fallen Star', W / 2, H / 2 - 22, { size: 64, alpha: card, shadow: 0 });
-  caption(ctx, 'EVERY FRAME DRAWN IN JAVASCRIPT · MUSIC SYNTHESIZED IN THE BROWSER', W / 2, H / 2 + 40, {
-    size: 19, alpha: card * 0.65, italic: false, weight: 600, spacing: 5, shadow: 0,
-  });
-
   grain(ctx, W, H, t, 0.07);
 }
 

@@ -3,7 +3,7 @@
 import {
   TAU, clamp, lerp, seg, smooth, easeInOut, easeOut, fade, hash, noise, fbm, curve, mixRgb, css, keyColor,
 } from '../../engine/util.js';
-import { glow, disc, grain, vignette, caption } from '../../engine/draw.js';
+import { glow, disc, grain, vignette } from '../../engine/draw.js';
 
 export const meta = {
   title: 'The Last Leaf',
@@ -21,7 +21,7 @@ const BEAT = 0.75; // 4/4 at 80 bpm, bars of 3 s
 
 const T = {
   dusk: 9, storm: 10.4, winter: 12.6, night: 15, dawn: 18.6, spring: 21, letGo: 27, pull: 27.4, pulled: 29.6,
-  land: 35.5, out: 36.9, end: 39,
+  land: 35.5, out: 37.6, end: 39,
 };
 
 // ——— palette through the seasons ———
@@ -778,27 +778,13 @@ export function draw(ctx, t) {
   }
   windLines(ctx, t);
 
-  // ——— words ———
-  const ink = '#3a2418';
-  const title = fade(t, 0.8, 5.4, 1.2, 0.9);
-  caption(ctx, 'The Last Leaf', W / 2, 150, { size: 104, alpha: title, color: ink, shadow: 0 });
-  caption(ctx, 'A SHORT FILM, DRAWN ENTIRELY IN CODE', W / 2, 232, {
-    size: 23, alpha: title * 0.75, italic: false, weight: 600, spacing: 7, color: ink, shadow: 0,
-  });
-  caption(ctx, 'It thought letting go meant falling.', W / 2, 150, { size: 62, alpha: fade(t, 29.7, 32.8, 0.8, 0.6), color: ink, shadow: 0 });
-  caption(ctx, 'It was flying.', W / 2, 150, { size: 72, alpha: fade(t, 33.1, 36.6, 0.8, 0.7), color: ink, shadow: 0 });
-
   vignette(ctx, W, H, 0.32);
-  const black = smooth(seg(t, T.out, T.out + 0.9));
+  // fade in from black, and back out to black at the end: the pictures tell it all
+  const black = Math.max(1 - smooth(seg(t, 0, 1.4)), smooth(seg(t, T.out, T.end - 0.2)));
   if (black > 0) {
     ctx.fillStyle = `rgba(0,0,0,${black})`;
     ctx.fillRect(0, 0, W, H);
   }
-  const card = fade(t, 37.5, 40, 0.7, 0.1);
-  caption(ctx, 'The Last Leaf', W / 2, H / 2 - 22, { size: 64, alpha: card, shadow: 0 });
-  caption(ctx, 'EVERY FRAME DRAWN IN JAVASCRIPT · MUSIC SYNTHESIZED IN THE BROWSER', W / 2, H / 2 + 40, {
-    size: 19, alpha: card * 0.65, italic: false, weight: 600, spacing: 5, shadow: 0,
-  });
   grain(ctx, W, H, t, 0.06);
 }
 
